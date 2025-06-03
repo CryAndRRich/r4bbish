@@ -25,5 +25,8 @@ rubbish4/
 │
 ├── requirements.txt           # Các thư viện Python cần cài (timm, torch, torchvision, ...)
 ├── README.md                  # Giới thiệu tổng quan về dự án, cách chạy
-└── .gitignore       
+└── .gitignore
+DATASET
+https://www.kaggle.com/code/dhiazoghlami/waste-classification-model
+https://www.kaggle.com/datasets/alveddian/waste-dataset
 ```
