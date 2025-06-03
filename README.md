@@ -29,4 +29,5 @@ rubbish4/
 DATASET
 https://www.kaggle.com/code/dhiazoghlami/waste-classification-model
 https://www.kaggle.com/datasets/alveddian/waste-dataset
+Trashnet:https://github.com/garythung/trashnet
 ```
