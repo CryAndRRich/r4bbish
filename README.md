@@ -18,9 +18,9 @@ rubbish4/
 │   ├── config.py              # Cấu hình hyperparameters, đường dẫn, thiết lập chung
 |   └── clustering/            # Folder phân cụm
 │       ├── __init__.py
-│       ├── run_clustering.py   # Chạy trích đặc trưng + phân cụm + sinh CSV
-│       ├── utils_cluster.py    # Các hàm phụ trợ
-│       └── visualize.py        # Vẽ biểu đồ t-SNE
+│       ├── run_clustering.py  # Chạy trích đặc trưng + phân cụm + sinh CSV
+│       ├── utils_cluster.py   # Các hàm phụ trợ
+│       └── visualize.py       # Vẽ biểu đồ t-SNE
 |
 ├── experiments/               # Thư mục chứa logs, checkpoint sau khi train
 │   ├── logs/
