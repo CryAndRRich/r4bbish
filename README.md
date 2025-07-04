@@ -32,6 +32,6 @@ rubbish4/
 ├── README.md                  # Giới thiệu tổng quan về dự án, cách chạy
 └── .gitignore
 DATASET
-https://www.kaggle.com/code/dhiazoghlami/waste-classification-model
+https://www.kaggle.com/datasets/mrgetshjtdone/vn-trash-classification
 https://www.kaggle.com/datasets/feyzazkefe/trashnet
 ```
