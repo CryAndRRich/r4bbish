@@ -1,58 +1,49 @@
-import os
+from tqdm import tqdm
 import torch
-import logging
-from datetime import datetime
+import numpy as np
 
-def setup_logging(log_dir: str):
+def extract_features(model, dataloader, device, save_path_cv, save_path_vit):
     """
-    Thiết lập logging để ghi vào file và in ra console.
+    Trích xuất feature từ model và lưu vào file .npy chuẩn bằng np.save().
+    Sử dụng torch.cat để gom các batch, đảm bảo không lỗi khi load lại.
     """
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, f"train_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+    model.eval()
+    features_cv = []
+    features_vit = []
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='[%(asctime)s] %(levelname)s: %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler()
-        ]
-    )
-    return logging.getLogger()
+    with torch.no_grad():
+        for x_cv, x_vit in tqdm(dataloader, desc="Extracting features"):
+            x_cv = x_cv.to(device)
+            x_vit = x_vit.to(device)
 
-def save_checkpoint(state: dict, checkpoint_dir: str, epoch: int):
-    """
-    Lưu checkpoint (model state + optimizer state) ở epoch nhất định.
-    """
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    filename = os.path.join(checkpoint_dir, f"checkpoint_epoch_{epoch}.pth")
-    torch.save(state, filename)
-    return filename
+            h_cv, h_vit = model.encode(x_cv, x_vit)  # [B, 512]
 
-def load_checkpoint(model: torch.nn.Module, optimizer: torch.optim.Optimizer, 
-                    checkpoint_path: str, device: str):
-    """
-    Load model + optimizer state từ file checkpoint_path. 
-    Trả về epoch bắt đầu (nếu ghi trong checkpoint), hoặc 0 nếu không có.
-    """
-    if not os.path.isfile(checkpoint_path):
-        raise FileNotFoundError(f"No checkpoint found at '{checkpoint_path}'")
-    checkpoint = torch.load(checkpoint_path, map_location=device)
+            features_cv.append(h_cv.cpu())
+            features_vit.append(h_vit.cpu())
+
+    # Gộp toàn bộ feature lại thành tensor lớn
+    features_cv = torch.cat(features_cv, dim=0).numpy()
+    features_vit = torch.cat(features_vit, dim=0).numpy()
+
+    # Lưu ra file .npy chuẩn
+    np.save(save_path_cv, features_cv)
+    np.save(save_path_vit, features_vit)
+
+    print(f"✅ Saved features to: {save_path_cv}, {save_path_vit}")
+
+def save_checkpoint(model, optimizer, epoch, path):
+    save_path = path.format(epoch)
+    torch.save({
+        'epoch': epoch,
+        'model_state': model.state_dict(),
+        'optimizer_state': optimizer.state_dict(),
+    }, save_path)
+    print(f"Saved checkpoint to {save_path}")
+
+def load_checkpoint(model, optimizer, path, device):
+    checkpoint = torch.load(path, map_location=device)
     model.load_state_dict(checkpoint['model_state'])
     optimizer.load_state_dict(checkpoint['optimizer_state'])
-    start_epoch = checkpoint.get('epoch', 0) + 1
+    start_epoch = checkpoint['epoch'] + 1
+    print(f"Resumed from checkpoint: {path}, starting at epoch {start_epoch}")
     return start_epoch
-
-def adjust_learning_rate(optimizer: torch.optim.Optimizer, epoch: int, 
-                         init_lr: float, schedule: dict):
-    """
-    Giảm learning rate theo schedule (nếu cần). Ví dụ: schedule = {100:0.1, 150:0.01}
-    Nếu epoch >= milestone, lr = init_lr * scale.
-    """
-    lr = init_lr
-    for milestone, scale in schedule.items():
-        if epoch >= milestone:
-            lr = init_lr * scale
-    for param_group in optimizer.param_groups:
-        param_group['lr'] = lr
-    return lr
