@@ -1,3 +1,4 @@
+```
 rubbish4/
 ├── data/                      
 │   └── trashnet/              # Directory containing raw waste images
@@ -17,3 +18,4 @@ rubbish4/
 ├── requirements.txt           # Required Python packages (timm, torch, torchvision, etc.)
 ├── README.md                  # Project overview and usage instructions
 └── .gitignore
+```
